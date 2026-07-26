@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      2026-07-24
+// @version      1.0.0
 // @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
