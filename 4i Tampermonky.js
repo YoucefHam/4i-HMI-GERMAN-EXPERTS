@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
@@ -12,7 +12,7 @@
 // https://raw.githubusercontent.com/YoucefHam/4i-HMI-GERMAN-EXPERTS/refs/heads/main/4i%20Tampermonky.js
 
 /* Log changes
-    27/07/2026
+    27/07/2026 1.0.2
         add link for update
 */
 (function() {
