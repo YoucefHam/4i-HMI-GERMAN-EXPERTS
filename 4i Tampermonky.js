@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 // https://github.com/YoucefHam/4i-HMI-GERMAN-EXPERTS/blob/main/4i%20Tampermonky.js
-// https://raw.githubusercontent.com/YoucefHam/4i-HMI-GERMAN-EXPERTS/f75aa85416e6ee3c3db3397e4b0bc62df1cf1082/4i%20Tampermonky.js
+// https://raw.githubusercontent.com/YoucefHam/4i-HMI-GERMAN-EXPERTS/refs/heads/main/4i%20Tampermonky.js
 
 /* Log changes
     27/07/2026
