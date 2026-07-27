@@ -1,14 +1,20 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=40.145
 // @grant        none
 // ==/UserScript==
+// https://github.com/YoucefHam/4i-HMI-GERMAN-EXPERTS/blob/main/4i%20Tampermonky.js
+// https://raw.githubusercontent.com/YoucefHam/4i-HMI-GERMAN-EXPERTS/f75aa85416e6ee3c3db3397e4b0bc62df1cf1082/4i%20Tampermonky.js
 
+/* Log changes
+    27/07/2026
+        add link for update
+*/
 (function() {
     'use strict';
 
