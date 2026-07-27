@@ -14,6 +14,7 @@
 /* Log changes
     27/07/2026 1.0.2
         add link for update
+        removed Refresh from Mouse Back
 */
 (function() {
     'use strict';
@@ -139,9 +140,9 @@
         if (event.button === 3) {
             const closeBtn = document.querySelector('main > my-tabs > ul > li.active > a > span'); // [title="Close"]
             if (closeBtn) closeBtn.click();
-            setTimeout(() => {
+            /*setTimeout(() => {
                 clickElement('[title="Refresh"]');
-            }, 600);
+            }, 600);*/
 
         }
 
