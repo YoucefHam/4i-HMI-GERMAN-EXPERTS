@@ -14,6 +14,7 @@
 /* Log changes
     27/07/2026 1.0.2
         add link for update
+    27/07/2026 1.0.2.1
         removed Refresh from Mouse Back
 */
 (function() {
