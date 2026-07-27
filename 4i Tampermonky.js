@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.2.1
-// @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts.
+// @version      1.0.3
+// @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts. Added robust element waiting.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=40.145
@@ -16,15 +16,44 @@
         add link for update
     27/07/2026 1.0.2.1
         removed Refresh from Mouse Back
+    27/07/2026 1.0.3
+        Replaced setTimeout with waitForElement for dialog confirmations
+        Added debounce to MutationObserver for performance
 */
 (function() {
     'use strict';
 
-    // Helper Utilities
+    // --- Helper Utilities ---
     const clickElement = (selector) => {
         const el = document.querySelector(selector);
         if (el) el.click();
         return !!el;
+    };
+
+    // Waits dynamically for an element to appear in the DOM instead of guessing the time
+    const waitForElement = (selector, timeout = 5000) => {
+        return new Promise((resolve, reject) => {
+            // If it's already there, resolve immediately
+            const element = document.querySelector(selector);
+            if (element) return resolve(element);
+
+            // Otherwise, watch the DOM for changes
+            const observer = new MutationObserver((mutations, obs) => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    obs.disconnect(); // Stop watching once found
+                    resolve(el);
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // Safety net: timeout if it never appears
+            setTimeout(() => {
+                observer.disconnect();
+                reject(new Error(`Timeout waiting for: ${selector}`));
+            }, timeout);
+        });
     };
 
     // --- 1. Keyboard Shortcuts Listener ---
@@ -39,9 +68,11 @@
 
         event.preventDefault();
 
-
-        const confirmMaterialDialog = (delayMs = 300) => {
-            setTimeout(() => clickElement('mat-dialog-container .mat-raised-button'), delayMs);
+        // Updated to use waitForElement (timeout after 3 seconds if not found)
+        const confirmMaterialDialog = () => {
+            waitForElement('mat-dialog-container .mat-raised-button', 3000)
+                .then(btn => btn.click())
+                .catch(err => console.warn(err.message));
         };
 
         const updateBankInput = () => {
@@ -54,11 +85,6 @@
             if (isFactureTab) {
                 const bankInput = document.querySelector('[fieldcode="bank.Name"] input');
                 if (bankInput) {
-                    /*// Strip readonly restrictions before populating
-                    bankInput.removeAttribute('readonly');
-                    bankInput.readOnly = false;
-                    bankInput.style.backgroundColor = '#ffffff';*/
-
                     bankInput.focus();
                     bankInput.value = '-';
 
@@ -96,7 +122,7 @@
                 if (releaseBtn) {
                     if (confirm("Are you sure to release!!")) {
                         releaseBtn.click();
-                        confirmMaterialDialog(500);
+                        confirmMaterialDialog(); // Now waits dynamically
                     }
                 }
                 break;
@@ -113,58 +139,47 @@
                     if (confirm("Are you sure to save and release!!")) {
                         updateBankInput();
                         saveBtn.click();
+
+                        // We still use a small timeout here to let the Save network request process
+                        // before attempting to click Release.
                         setTimeout(() => {
                             if (clickElement('[title="Release"]')) {
-                                confirmMaterialDialog(500);
+                                confirmMaterialDialog(); // Now waits dynamically
                             }
                         }, 1000);
                     }
                 }
                 break;
             }
-
         }
     });
 
     // --- 2. Mouse Side Buttons Listener (XButton1 & XButton2) ---
     document.addEventListener('mousedown', function (event) {
-        // Only proceed for side buttons (3 = Back / XButton1, 4 = Forward / XButton2)
         if (event.button !== 3 && event.button !== 4) return;
 
-        // Authorize user once up front
         const userSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
         if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
 
-        event.preventDefault(); // Prevents default browser navigation (Back/Forward)
+        event.preventDefault();
 
-        // XButton1 (Mouse Back) -> Clicks Close button
         if (event.button === 3) {
-            const closeBtn = document.querySelector('main > my-tabs > ul > li.active > a > span'); // [title="Close"]
+            const closeBtn = document.querySelector('main > my-tabs > ul > li.active > a > span');
             if (closeBtn) closeBtn.click();
-            /*setTimeout(() => {
-                clickElement('[title="Refresh"]');
-            }, 600);*/
-
         }
 
-        // XButton2 (Mouse Forward) -> Unlock Readonly Inputs
         if (event.button === 4) {
             const activeElement = document.activeElement;
-            if (activeElement && activeElement.hasAttribute('readonly')) { // && activeElement.tagName === 'INPUT'
+            if (activeElement && activeElement.hasAttribute('readonly')) {
                 activeElement.removeAttribute('readonly');
                 activeElement.readOnly = false;
-                activeElement.style.backgroundColor = '#ffffff'; // Clear grey background
+                activeElement.style.backgroundColor = '#ffffff';
             }
         }
     });
 
-
-
-    // ######################################################################## DELETE BUTTON ###################################################################
-    // HIDE DELETE BUTTON
-
+    // --- 3. Access Control (Delete Button) ---
     function checkAndHideDeleteButton() {
-        // Target the specific span in the active layout
         const targetSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
 
         if (targetSpan &&
@@ -173,29 +188,30 @@
             targetSpan.textContent.trim() !== 'mokhtar' &&
             targetSpan.textContent.trim() !== 'admin'
            )) {
-            // Find the delete button within the active context/app
             const deleteButtons = document.querySelectorAll('[title="app.Delete"]');
             deleteButtons.forEach(btn => {
                 btn.disabled = true;
                 btn.setAttribute('disabled', 'disabled');
-
-                // Apply styles so non-button tags (<div>, <a>) act disabled
-                btn.style.pointerEvents = 'none'; // Prevents mouse clicks/hovers
-                btn.style.opacity = '0.5'; // Visual cue that it's disabled
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
             });
         }
     }
 
-    // 1. Run immediately on load
+    // Debounce utility to prevent the observer from freezing the browser
+    let debounceTimer;
+    const debouncedCheck = () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(checkAndHideDeleteButton, 150);
+    };
+
     checkAndHideDeleteButton();
 
-    // 2. Observe DOM mutations (catches tab switches, AJAX updates, dynamic rendering)
     const observer = new MutationObserver(() => {
-        checkAndHideDeleteButton();
+        debouncedCheck(); // Now runs efficiently instead of firing hundreds of times per second
     });
 
-    // Start watching the main container or whole body for updates
     observer.observe(document.body, {
         childList: true,
         subtree: true
