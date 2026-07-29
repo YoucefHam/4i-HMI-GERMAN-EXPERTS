@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3
+// @version      1.0.3.1
 // @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts. Added robust element waiting.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
@@ -19,6 +19,8 @@
     27/07/2026 1.0.3
         Replaced setTimeout with waitForElement for dialog confirmations
         Added debounce to MutationObserver for performance
+    29/07/2026 1.0.3.1
+        Remove Access Control (Delete Button)
 */
 (function() {
     'use strict';
@@ -97,16 +99,6 @@
 
         // Key Handler Logic
         switch (event.code) {
-            case 'F9': {
-                const listDeleteBtn = document.querySelector('fi-list-view2 span:has(img[src="assets/icons/trash-24.png"])');
-                if (listDeleteBtn) {
-                    if (confirm("Are you sure to Delete!!")) {
-                        listDeleteBtn.click();
-                    }
-                }
-                break;
-            }
-
             case 'F1': {
                 clickElement('[title="New"]');
                 break;
@@ -150,6 +142,17 @@
                     }
                 }
                 break;
+
+            case 'F9': {
+                const listDeleteBtn = document.querySelector('fi-list-view2 span:has(img[src="assets/icons/trash-24.png"])');
+                if (listDeleteBtn) {
+                    ///if (confirm("Are you sure to Delete!!")) {
+                        listDeleteBtn.click();
+                    //}
+                }
+                break;
+            }
+
             }
         }
     });
@@ -177,7 +180,7 @@
             }
         }
     });
-
+/*
     // --- 3. Access Control (Delete Button) ---
     function checkAndHideDeleteButton() {
         const targetSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
@@ -216,4 +219,5 @@
         childList: true,
         subtree: true
     });
+*/
 })();
