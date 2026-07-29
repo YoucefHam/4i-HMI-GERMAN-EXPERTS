@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3.1
+// @version      1.0.3.2
 // @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts. Added robust element waiting.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
@@ -21,6 +21,8 @@
         Added debounce to MutationObserver for performance
     29/07/2026 1.0.3.1
         Remove Access Control (Delete Button)
+    29/07/2026 1.0.3.2
+        Fix Syntax
 */
 (function() {
     'use strict';
@@ -142,6 +144,7 @@
                     }
                 }
                 break;
+            }
 
             case 'F9': {
                 const listDeleteBtn = document.querySelector('fi-list-view2 span:has(img[src="assets/icons/trash-24.png"])');
@@ -153,7 +156,6 @@
                 break;
             }
 
-            }
         }
     });
 
