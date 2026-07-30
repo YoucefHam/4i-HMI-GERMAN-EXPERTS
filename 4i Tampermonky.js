@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3.2
-// @description  Automate save, release, refresh, close, and form modifications with keyboard and mouse shortcuts. Added robust element waiting.
+// @version      1.0.4.1
+// @description  Automate save, release, refresh, close, form modifications, keyboard/mouse shortcuts, and custom CSS overrides with !important priority.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=40.145
@@ -23,9 +23,120 @@
         Remove Access Control (Delete Button)
     29/07/2026 1.0.3.2
         Fix Syntax
+    29/07/2026 1.0.3.3
+        Added Refresh from Mouse Back
+    30/07/2026 1.0.4
+        Added custom CSS UI overrides via dynamic DOM element injection
+    30/07/2026 1.0.4.1
+        Added !important flag to all CSS override rules
 */
 (function() {
     'use strict';
+
+    // --- Dynamic CSS Injection (Method 2 - No @grant needed) ---
+    const injectStyles = () => {
+        const style = document.createElement('style');
+        style.id = 'custom-portal-overrides';
+        style.textContent = `
+            /*******************************Dashboard*/
+            /*Screen Scrool*/
+            welcome-component fi-4i-main-tile-panel > div[class="metal-main-container"] {
+              min-height: calc(94vh - 100px) !important;
+            }
+            /*Card Scrool*/
+            welcome-component business-dashboard-component wo-kanban-cards > div{
+              height: calc(60vh - 260px) !important;
+            }
+            welcome-component fi-4i-main-tile-panel  div[class="kanban-board ng-star-inserted"] > div {
+              height: calc(94vh - 260px) !important;
+            }
+            /*****************************Lists */
+            /*Screen Scrool*/
+            :is(
+              vehicles-component,
+              work-orders-component,
+              customers-component,
+              sale-orders-component,
+              sale-returns-component,
+              sale-invoices-component,
+              sale-invoice-returns-component,
+              suppliers-component,
+              quotation-requests-component,
+              purchase-orders-component,
+              grns-component,
+              suppliers-returns-component,
+              purchase-invoices-component,
+              purchase-invoice-returns-component,
+              items-component,
+              transfers-component,
+              adjustments-component,
+              inbounds-component,
+              outbounds-component,
+              list-ar-transaction-component,
+              list-ap-transaction-component,
+              list-cash-transaction-component,
+              list-transfert-transaction-component
+            ) fi-list-view2 div[class="main contents"] > div > as-split {
+              height: calc(85vh - 140px) !important;
+            }
+
+            /*******************************OR Editor*/
+            /*Font Size*/
+            work-order-component [class="fi-splitter-pane pane-2"] span,
+            work-order-component [formcontrolname="detailDescription"],
+            work-order-component [formcontrolname="detailDescription2"],
+            work-order-component [formcontrolname="customerProvidedParts"] {
+              font-size: 15px !important;
+            }
+            work-order-component .ag-theme-balham {
+              --ag-font-size : 16px !important;
+            }
+            /*Screen Scrool*/
+            work-order-component div[class="metal-project-container"] {
+              height: calc(95vh - 120px) !important;
+            }
+            /*Payment Panel Scrool*/
+            work-order-component [role="tabpanel"] > div {
+              overflow: auto !important;
+            }
+            /*Search item*/
+            work-order-component work-order-lines-list-view item-quick-search .tw-absolute{
+              max-width: 60vw;
+              resize: horizontal;
+            }
+
+            /******************************* Autocomplete List*/
+            [role="listbox"] {
+              max-height: 50vh !important;
+              min-width: fit-content !important;
+              max-width: 40vw !important;
+              width: fit-content !important;
+              resize: both !important;
+            }
+
+            /*******************************Print*/
+            /*Screen Scrool*/
+            pdf-viewer {
+              height: 78vh !important;
+            }
+
+            /*******************************Banque/Caisse */
+            div[col-id="balance"] {
+              text-align: right !important;
+            }
+
+            /******************************* workflow-visual-editor*/
+            workflow-visual-editor .svg-scroll-container {
+              max-height: unset !important;
+            }
+            p-tabpanel ag-grid-angular {
+              height: 70vh !important;
+            }
+        `;
+        (document.body || document.documentElement).appendChild(style);
+    };
+
+    injectStyles();
 
     // --- Helper Utilities ---
     const clickElement = (selector) => {
@@ -37,22 +148,19 @@
     // Waits dynamically for an element to appear in the DOM instead of guessing the time
     const waitForElement = (selector, timeout = 5000) => {
         return new Promise((resolve, reject) => {
-            // If it's already there, resolve immediately
             const element = document.querySelector(selector);
             if (element) return resolve(element);
 
-            // Otherwise, watch the DOM for changes
             const observer = new MutationObserver((mutations, obs) => {
                 const el = document.querySelector(selector);
                 if (el) {
-                    obs.disconnect(); // Stop watching once found
+                    obs.disconnect();
                     resolve(el);
                 }
             });
 
             observer.observe(document.body, { childList: true, subtree: true });
 
-            // Safety net: timeout if it never appears
             setTimeout(() => {
                 observer.disconnect();
                 reject(new Error(`Timeout waiting for: ${selector}`));
@@ -106,7 +214,7 @@
                 break;
             }
             case 'F2': {
-                updateBankInput();
+                //updateBankInput();
                 clickElement('[title="Save"]');
                 break;
             }
@@ -116,7 +224,7 @@
                 if (releaseBtn) {
                     if (confirm("Are you sure to release!!")) {
                         releaseBtn.click();
-                        confirmMaterialDialog(); // Now waits dynamically
+                        confirmMaterialDialog();
                     }
                 }
                 break;
@@ -134,11 +242,9 @@
                         updateBankInput();
                         saveBtn.click();
 
-                        // We still use a small timeout here to let the Save network request process
-                        // before attempting to click Release.
                         setTimeout(() => {
                             if (clickElement('[title="Release"]')) {
-                                confirmMaterialDialog(); // Now waits dynamically
+                                confirmMaterialDialog();
                             }
                         }, 1000);
                     }
@@ -149,13 +255,10 @@
             case 'F9': {
                 const listDeleteBtn = document.querySelector('fi-list-view2 span:has(img[src="assets/icons/trash-24.png"])');
                 if (listDeleteBtn) {
-                    ///if (confirm("Are you sure to Delete!!")) {
-                        listDeleteBtn.click();
-                    //}
+                    listDeleteBtn.click();
                 }
                 break;
             }
-
         }
     });
 
@@ -170,7 +273,14 @@
 
         if (event.button === 3) {
             const closeBtn = document.querySelector('main > my-tabs > ul > li.active > a > span');
-            if (closeBtn) closeBtn.click();
+            if (closeBtn) {
+                closeBtn.click();
+                setTimeout(() => {
+                    if (document.querySelector('main > my-tabs li.active > a.active').textContent.trim() !== 'Ordres de Travail ×') {
+                        clickElement('[title="Refresh"]');
+                    }
+                }, 300);
+            }
         }
 
         if (event.button === 4) {
@@ -182,44 +292,4 @@
             }
         }
     });
-/*
-    // --- 3. Access Control (Delete Button) ---
-    function checkAndHideDeleteButton() {
-        const targetSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
-
-        if (targetSpan &&
-           (
-            targetSpan.textContent.trim() !== 'youcefham' &&
-            targetSpan.textContent.trim() !== 'mokhtar' &&
-            targetSpan.textContent.trim() !== 'admin'
-           )) {
-            const deleteButtons = document.querySelectorAll('[title="app.Delete"]');
-            deleteButtons.forEach(btn => {
-                btn.disabled = true;
-                btn.setAttribute('disabled', 'disabled');
-                btn.style.pointerEvents = 'none';
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-            });
-        }
-    }
-
-    // Debounce utility to prevent the observer from freezing the browser
-    let debounceTimer;
-    const debouncedCheck = () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(checkAndHideDeleteButton, 150);
-    };
-
-    checkAndHideDeleteButton();
-
-    const observer = new MutationObserver(() => {
-        debouncedCheck(); // Now runs efficiently instead of firing hundreds of times per second
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-*/
 })();
