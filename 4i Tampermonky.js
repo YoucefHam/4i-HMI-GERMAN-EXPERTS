@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.4.1
+// @version      1.0.4.2
 // @description  Automate save, release, refresh, close, form modifications, keyboard/mouse shortcuts, and custom CSS overrides with !important priority.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
@@ -29,7 +29,9 @@
         Added custom CSS UI overrides via dynamic DOM element injection
     30/07/2026 1.0.4.1
         Added !important flag to all CSS override rules
-*/
+    30/07/2026 1.0.4.2
+        Fix Report Jornal panal
+        */
 (function() {
     'use strict';
 
@@ -38,6 +40,11 @@
         const style = document.createElement('style');
         style.id = 'custom-portal-overrides';
         style.textContent = `
+        
+            /* USEFULL FUNCTION
+            Count Selector
+            document.querySelectorAll('[class*="panel-content"]').length
+            */
             /*******************************Dashboard*/
             /*Screen Scrool*/
             welcome-component fi-4i-main-tile-panel > div[class="metal-main-container"] {
@@ -131,6 +138,15 @@
             }
             p-tabpanel ag-grid-angular {
               height: 70vh !important;
+            }
+            
+            /************************************* Raport Journal */
+            [class*="main.contents"] fi-filter-component {
+              visibility: hidden;
+              display: none;
+            }
+            div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
+              display: none;
             }
         `;
         (document.body || document.documentElement).appendChild(style);
