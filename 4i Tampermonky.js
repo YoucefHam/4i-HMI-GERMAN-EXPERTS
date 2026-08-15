@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.5.0
+// @version      1.0.5.1
 // @description  Automate save, release, refresh, close, form modifications, keyboard/mouse shortcuts, and custom CSS overrides with !important priority.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
@@ -57,113 +57,126 @@
         style.id = 'custom-portal-overrides';
         style.textContent = `
 
-            /* USEFULL FUNCTION
-            Count Selector
-            document.querySelectorAll('[class*="panel-content"]').length
-            */
-            /*******************************Dashboard*/
-            /*Screen Scrool*/
-            welcome-component fi-4i-main-tile-panel > div[class="metal-main-container"] {
-              min-height: calc(94vh - 100px) !important;
-            }
-            /*Card Scrool*/
-            welcome-component business-dashboard-component wo-kanban-cards > div{
-              height: calc(60vh - 260px) !important;
-            }
-            welcome-component fi-4i-main-tile-panel  div[class="kanban-board ng-star-inserted"] > div {
-              height: calc(94vh - 260px) !important;
-            }
-            /*****************************Lists */
-            /*Screen Scrool*/
-            :is(
-              vehicles-component,
-              work-orders-component,
-              customers-component,
-              sale-orders-component,
-              sale-returns-component,
-              sale-invoices-component,
-              sale-invoice-returns-component,
-              suppliers-component,
-              quotation-requests-component,
-              purchase-orders-component,
-              grns-component,
-              suppliers-returns-component,
-              purchase-invoices-component,
-              purchase-invoice-returns-component,
-              items-component,
-              transfers-component,
-              adjustments-component,
-              inbounds-component,
-              outbounds-component,
-              list-ar-transaction-component,
-              list-ap-transaction-component,
-              list-cash-transaction-component,
-              list-transfert-transaction-component
-            ) fi-list-view2 div[class="main contents"] > div > as-split {
-              height: calc(85vh - 140px) !important;
-            }
+/* USEFULL FUNCTION
+Count Selector
+document.querySelectorAll('[class*="panel-content"]').length
+*/
 
-            /*******************************OR Editor*/
-            /*Font Size*/
-            work-order-component [class="fi-splitter-pane pane-2"] span,
-            work-order-component [formcontrolname="detailDescription"],
-            work-order-component [formcontrolname="detailDescription2"],
-            work-order-component [formcontrolname="customerProvidedParts"] {
-              font-size: 15px !important;
-            }
-            work-order-component .ag-theme-balham {
-              --ag-font-size : 16px !important;
-            }
-            /*Screen Scrool*/
-            work-order-component div[class="metal-project-container"] {
-              height: calc(95vh - 120px) !important;
-            }
-            /*Payment Panel Scrool*/
-            work-order-component [role="tabpanel"] > div {
-              overflow: auto !important;
-            }
-            /*Search item*/
-            work-order-component work-order-lines-list-view item-quick-search .tw-absolute{
-              max-width: 60vw;
-              resize: horizontal;
-            }
+/*^(Width input box|).*http://102.206.40.145:8080.*$*/
+div[class*="input-group"]:has(input){
+  width: unset;
+  max-width: 400px;
+}
+div[class*="input-group"] > input{
+  max-width: 400px;
+}
 
-            /******************************* Autocomplete List*/
-            [role="listbox"] {
-              max-height: 50vh !important;
-              min-width: fit-content !important;
-              max-width: 40vw !important;
-              width: fit-content !important;
-              resize: both !important;
-            }
+/*******************************Dashboard*/
+/*Screen Scrool*/
+welcome-component fi-4i-main-tile-panel > div[class="metal-main-container"] {
+  min-height: 80vh !important;
+}
+/*Card Scrool*/
+welcome-component business-dashboard-component wo-kanban-cards > div{
+  height: 65vh !important;
+}
+welcome-component fi-4i-main-tile-panel  div[class="kanban-board ng-star-inserted"] > div {
+  height: 57vh !important;
+}
+/*****************************Lists */
+/*Screen Scrool*/
+:is(
+  vehicles-component,
+  customers-component,
+  sale-orders-component,
+  sale-returns-component,
+  sale-invoices-component,
+  sale-invoice-returns-component,
+  suppliers-component,
+  quotation-requests-component,
+  purchase-orders-component,
+  grns-component,
+  suppliers-returns-component,
+  purchase-invoices-component,
+  purchase-invoice-returns-component,
+  items-component,
+  transfers-component,
+  adjustments-component,
+  inbounds-component,
+  outbounds-component,
+  list-ar-transaction-component,
+  list-ap-transaction-component,
+  list-cash-transaction-component,
+  list-transfert-transaction-component
+) fi-list-view2 div[class="main contents"] > div > as-split {
+  height: calc(85vh - 140px) !important;
+}
+:is(work-orders-component) fi-list-view2 div[class="main contents"] > div > as-split {
+  height: 73vh !important;
+}
+/*******************************OR Editor*/
+/*Font Size*/
+work-order-component [class="fi-splitter-pane pane-2"] span,
+work-order-component [formcontrolname="detailDescription"],
+work-order-component [formcontrolname="detailDescription2"],
+work-order-component [formcontrolname="customerProvidedParts"] {
+  font-size: 15px !important;
+}
+work-order-component .ag-theme-balham {
+  --ag-font-size : 16px !important;
+}
+/*Screen Scrool*/
+work-order-component div[class="metal-project-container"] {
+  height: calc(95vh - 120px) !important;
+}
+/*Payment Panel Scrool*/
+work-order-component [role="tabpanel"] > div {
+  overflow: auto !important;
+}
+/*Search item*/
+work-order-component work-order-lines-list-view item-quick-search .tw-absolute{
+  max-width: 60vw;
+  resize: horizontal;
+}
 
-            /*******************************Print*/
-            /*Screen Scrool*/
-            pdf-viewer {
-              height: 78vh !important;
-            }
+/******************************* Autocomplete List*/
+[role="listbox"] {
+  max-height: 50vh !important;
+  min-width: fit-content !important;
+  max-width: 40vw !important;
+  width: fit-content !important;
+  resize: both !important;
+}
 
-            /*******************************Banque/Caisse */
-            div[col-id="balance"] {
-              text-align: right !important;
-            }
+/*******************************Print*/
+/*Screen Scrool*/
+pdf-viewer {
+  height: 78vh !important;
+}
 
-            /******************************* workflow-visual-editor*/
-            workflow-visual-editor .svg-scroll-container {
-              max-height: unset !important;
-            }
-            p-tabpanel ag-grid-angular {
-              height: 70vh !important;
-            }
+/*******************************Banque/Caisse */
+div[col-id="balance"] {
+  text-align: right !important;
+}
 
-            /************************************* Raport Journal */
-            [class*="main.contents"] fi-filter-component {
-              visibility: hidden;
-              display: none;
-            }
-            div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
-              display: none;
-            }
+/******************************* workflow-visual-editor*/
+workflow-visual-editor .svg-scroll-container {
+  max-height: unset !important;
+}
+p-tabpanel ag-grid-angular {
+  height: 70vh !important;
+}
+
+/************************************* Raport Journal */
+[class*="main.contents"] fi-filter-component {
+  visibility: hidden;
+  display: none;
+}
+div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
+  display: none;
+}
+
+
         `;
         (document.body || document.documentElement).appendChild(style);
     };
@@ -376,7 +389,7 @@
 
             if (numericInput) {
                 numericInput.focus();
-                setInputValue(numericInput, '');
+                //setInputValue(numericInput, '');
 
                 if (!numericInput.dataset.arEnterBound) {
                     numericInput.dataset.arEnterBound = 'true';
@@ -473,13 +486,12 @@
 
     // --- 1. Keyboard Shortcuts Listener ---
     document.addEventListener('keydown', function (event) {
-        const HANDLED_KEYS = ['F9', 'F1', 'F2', 'F4', 'F5', 'F8'];
+        const HANDLED_KEYS = ['F9', 'F1', 'F2', 'F4', 'F5', 'F8','F12'];
         if (!HANDLED_KEYS.includes(event.code)) return;
 
         const userSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
         if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
 
-        event.preventDefault();
 
         const confirmMaterialDialog = () => {
             waitForElement('mat-dialog-container .mat-raised-button', 3000)
@@ -507,6 +519,7 @@
             }
         };
 
+        event.preventDefault();
         switch (event.code) {
             case 'F1': {
                 clickElement('[title="New"]');
@@ -553,6 +566,29 @@
                 }
                 break;
             }
+            case 'F12': {
+                if (clickElement('[title="Edit"]')) {
+                    setTimeout(() => {
+                        if (clickElement('[title="Reopen"]')) {
+                            confirmMaterialDialog();
+                            setTimeout(() => {
+                                if (clickElement('[title="Close"]')) {
+                                    setTimeout(() => {
+                                        if (clickElement('button[class="btn btn-discard"]')) {
+                                            setTimeout(() => {
+                                                if (clickElement('[title="Delete"]')) {
+                                                    confirmMaterialDialog();
+                                                }
+                                            }, 1500);
+                                        }
+                                    }, 800);
+                                }
+                            }, 1200);
+                        }
+                    }, 1500);
+                }
+                break;
+            }
         }
     });
 
@@ -566,6 +602,8 @@
         event.preventDefault();
 
         if (event.button === 3) {
+
+            event.preventDefault();
             const closeBtn = document.querySelector('main > my-tabs > ul > li.active > a > span');
             if (closeBtn) {
                 closeBtn.click();
@@ -578,6 +616,7 @@
         }
 
         if (event.button === 4) {
+            event.preventDefault();
             const activeElement = document.activeElement;
             if (activeElement && activeElement.hasAttribute('readonly')) {
                 activeElement.removeAttribute('readonly');
