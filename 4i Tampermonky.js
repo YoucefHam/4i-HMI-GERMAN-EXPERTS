@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.5.1
+// @version      1.0.5.2
 // @description  Automate save, release, refresh, close, form modifications, keyboard/mouse shortcuts, and custom CSS overrides with !important priority.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/
@@ -30,7 +30,7 @@
     30/07/2026 1.0.4.1
         Added !important flag to all CSS override rules
     30/07/2026 1.0.4.2
-        Fix Report Jornal panal
+        Fix Report Journal panel
     11/08/2026 1.0.4.3
         Added auto-type "exp" + Enter for select-project-type-component
     11/08/2026 1.0.4.4
@@ -47,7 +47,9 @@
         Added cash-transaction-component automation for EMPLOYE context, Description enter flow, and Save trigger
     11/08/2026 1.0.5.0
         Added ar-transaction-component automation for Espèce payment method -> Reception account -> empty numeric input -> Enter to Save
-        */
+    15/08/2026 1.0.5.2
+        Added !important flag across all custom CSS style definitions
+*/
 (function() {
     'use strict';
 
@@ -57,34 +59,21 @@
         style.id = 'custom-portal-overrides';
         style.textContent = `
 
-/* USEFULL FUNCTION
-Count Selector
-document.querySelectorAll('[class*="panel-content"]').length
-*/
-
-/*^(Width input box|).*http://102.206.40.145:8080.*$*/
-div[class*="input-group"]:has(input){
-  width: unset;
-  max-width: 400px;
-}
-div[class*="input-group"] > input{
-  max-width: 400px;
-}
-
 /*******************************Dashboard*/
-/*Screen Scrool*/
+/*Screen Scroll*/
 welcome-component fi-4i-main-tile-panel > div[class="metal-main-container"] {
   min-height: 80vh !important;
 }
-/*Card Scrool*/
-welcome-component business-dashboard-component wo-kanban-cards > div{
+/*Card Scroll*/
+welcome-component business-dashboard-component wo-kanban-cards > div {
   height: 65vh !important;
 }
-welcome-component fi-4i-main-tile-panel  div[class="kanban-board ng-star-inserted"] > div {
+welcome-component fi-4i-main-tile-panel div[class="kanban-board ng-star-inserted"] > div {
   height: 57vh !important;
 }
+
 /*****************************Lists */
-/*Screen Scrool*/
+/*Screen Scroll*/
 :is(
   vehicles-component,
   customers-component,
@@ -114,6 +103,7 @@ welcome-component fi-4i-main-tile-panel  div[class="kanban-board ng-star-inserte
 :is(work-orders-component) fi-list-view2 div[class="main contents"] > div > as-split {
   height: 73vh !important;
 }
+
 /*******************************OR Editor*/
 /*Font Size*/
 work-order-component [class="fi-splitter-pane pane-2"] span,
@@ -125,18 +115,18 @@ work-order-component [formcontrolname="customerProvidedParts"] {
 work-order-component .ag-theme-balham {
   --ag-font-size : 16px !important;
 }
-/*Screen Scrool*/
+/*Screen Scroll*/
 work-order-component div[class="metal-project-container"] {
   height: calc(95vh - 120px) !important;
 }
-/*Payment Panel Scrool*/
+/*Payment Panel Scroll*/
 work-order-component [role="tabpanel"] > div {
   overflow: auto !important;
 }
 /*Search item*/
-work-order-component work-order-lines-list-view item-quick-search .tw-absolute{
-  max-width: 60vw;
-  resize: horizontal;
+work-order-component work-order-lines-list-view item-quick-search .tw-absolute {
+  max-width: 60vw !important;
+  resize: horizontal !important;
 }
 
 /******************************* Autocomplete List*/
@@ -149,7 +139,7 @@ work-order-component work-order-lines-list-view item-quick-search .tw-absolute{
 }
 
 /*******************************Print*/
-/*Screen Scrool*/
+/*Screen Scroll*/
 pdf-viewer {
   height: 78vh !important;
 }
@@ -167,16 +157,23 @@ p-tabpanel ag-grid-angular {
   height: 70vh !important;
 }
 
-/************************************* Raport Journal */
+/************************************* Rapport Journal */
 [class*="main.contents"] fi-filter-component {
-  visibility: hidden;
-  display: none;
+  visibility: hidden !important;
+  display: none !important;
 }
 div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
-  display: none;
+  display: none !important;
 }
 
-
+/* Width input box */
+div[class*="input-group"]:has(input) {
+  width: unset !important;
+  max-width: 400px !important;
+}
+div[class*="input-group"] > input {
+  max-width: 400px !important;
+}
         `;
         (document.body || document.documentElement).appendChild(style);
     };
@@ -389,7 +386,6 @@ div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
 
             if (numericInput) {
                 numericInput.focus();
-                //setInputValue(numericInput, '');
 
                 if (!numericInput.dataset.arEnterBound) {
                     numericInput.dataset.arEnterBound = 'true';
@@ -420,7 +416,6 @@ div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
         const payMethodInput = payMethodComp.querySelector('input');
         if (!payMethodInput) return;
 
-        // Check if value already contains "Espèce"
         if ((payMethodInput.value || '').includes('Espèce')) {
             if (arComp.dataset.arProcessed !== 'true') {
                 arComp.dataset.arProcessed = 'true';
@@ -428,7 +423,6 @@ div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
             }
         }
 
-        // Listen for user changing payment method input to "Espèce" dynamically
         if (!payMethodInput.dataset.arListenerBound) {
             payMethodInput.dataset.arListenerBound = 'true';
 
@@ -486,12 +480,11 @@ div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
 
     // --- 1. Keyboard Shortcuts Listener ---
     document.addEventListener('keydown', function (event) {
-        const HANDLED_KEYS = ['F9', 'F1', 'F2', 'F4', 'F5', 'F8','F12'];
+        const HANDLED_KEYS = ['F9', 'F1', 'F2', 'F4', 'F5', 'F8', 'F12'];
         if (!HANDLED_KEYS.includes(event.code)) return;
 
         const userSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
         if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
-
 
         const confirmMaterialDialog = () => {
             waitForElement('mat-dialog-container .mat-raised-button', 3000)
@@ -602,7 +595,6 @@ div[role="region"] > div > div.panel-content > div:nth-of-type(4) {
         event.preventDefault();
 
         if (event.button === 3) {
-
             event.preventDefault();
             const closeBtn = document.querySelector('main > my-tabs > ul > li.active > a > span');
             if (closeBtn) {
