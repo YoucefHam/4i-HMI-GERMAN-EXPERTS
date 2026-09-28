@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.9
+// @version      1.0.10
 // @description  Automate save, release, refresh, close, form modifications, keyboard/mouse shortcuts, and custom CSS overrides with !important priority.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/*
@@ -33,6 +33,7 @@
     15/08/2026 1.0.5.2 - Added !important flag across all custom CSS style definitions
     19/09/2026 1.0.8 - Fixed cash transaction automation re-trigger on dropdown selection change
     19/09/2026 1.0.9 - Fixed EMPOLY & Key F9
+    19/09/2026 1.0.10 - Fixed Keys F1 - F8
 */
 
 // Step 1: Wrap everything in an IIFE to avoid polluting the global scope
@@ -402,15 +403,15 @@
 
         switch (event.code) {
             case 'F1': {
-                clickElement('[title="New"]');
+                clickElement('[title="New"],[title="Nouveau"]');
                 break;
             }
             case 'F2': {
-                clickElement('[title="Save"]');
+                clickElement('[title="Save"],[title="Sauvegarder"]');
                 break;
             }
             case 'F4': {
-                const releaseBtn = document.querySelector('[title="Release"]');
+                const releaseBtn = document.querySelector('[title="Release"],[title="Valider"]');
                 if (releaseBtn) {
                     if (confirm("Are you sure to release!!")) {
                         releaseBtn.click();
@@ -420,18 +421,18 @@
                 break;
             }
             case 'F5': {
-                clickElement('[title="Refresh"]');
+                clickElement('[title="Refresh"],[title="Actualiser"]');
                 break;
             }
             case 'F8': {
-                const saveBtn = document.querySelector('[title="Save"]');
+                const saveBtn = document.querySelector('[title="Save"],[title="Sauvegarder"]');
                 if (saveBtn) {
                     if (confirm("Are you sure to save and release!!")) {
                         updateBankInput();
                         saveBtn.click();
 
                         setTimeout(() => {
-                            if (clickElement('[title="Release"]')) {
+                            if (clickElement('[title="Release"],[title="Valider"]')) {
                                 confirmMaterialDialog();
                             }
                         }, 1000);
@@ -472,8 +473,8 @@
 
                 setTimeout(() => {
                     const activeTabLink = document.querySelector('main > my-tabs li.active > a.active');
-                    if (activeTabLink && activeTabLink.textContent.trim() !== 'Ordres de Travail ×') {
-                        clickElement('[title="Refresh"]');
+                    if ((activeTabLink && activeTabLink.textContent.trim() !== 'Ordres de Travail ×') || (activeTabLink && activeTabLink.textContent.trim() !== ' Work Orders ×')) {
+                        clickElement('[title="Refresh"],[title="Actualiser"]');
                     }
                 }, 300);
             }
