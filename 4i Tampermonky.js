@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         4I
 // @namespace    http://tampermonkey.net/
-// @version      1.0.8
+// @version      1.0.9
 // @description  Automate save, release, refresh, close, form modifications, keyboard/mouse shortcuts, and custom CSS overrides with !important priority.
 // @author       YoucefHam
 // @match        http://102.206.40.145:8080/portal/*
@@ -32,6 +32,7 @@
     11/08/2026 1.0.5.0 - Added ar-transaction-component automation for Espèce payment method -> Reception account -> empty numeric input -> Enter to Save
     15/08/2026 1.0.5.2 - Added !important flag across all custom CSS style definitions
     19/09/2026 1.0.8 - Fixed cash transaction automation re-trigger on dropdown selection change
+    19/09/2026 1.0.9 - Fixed EMPOLY & Key F9
 */
 
 // Step 1: Wrap everything in an IIFE to avoid polluting the global scope
@@ -300,13 +301,16 @@
             if (contextComp && contextComp.dataset.processed !== 'true') {
                 const contextInput = contextComp.querySelector('input');
                 if (contextInput && !contextInput.readOnly && !contextInput.hasAttribute('readonly')) {
-                    contextComp.dataset.processed = 'true';
+                    setTimeout(() => {
+                        contextComp.dataset.processed = 'true';
 
-                    contextInput.focus();
-                    setInputValue(contextInput, 'EMPLOYE');
-                    triggerEnterKey(contextInput, () => {
-                        setupCashTransactionEnterFlow(cashComp);
-                    });
+                        contextInput.focus();
+                        setInputValue(contextInput, 'EMPLOYE');
+                        triggerEnterKey(contextInput, () => {
+                            setupCashTransactionEnterFlow(cashComp);
+                        });
+                    }, 200);
+
                 }
             }
         }
@@ -341,7 +345,7 @@
 
     document.addEventListener('keydown', function (event) {
         const userSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
-        if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
+        //if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
 
         const HANDLED_KEYS = ['F1', 'F2', 'F4', 'F5', 'F8', 'F9'];
         if (!HANDLED_KEYS.includes(event.code)) return;
@@ -436,7 +440,13 @@
                 break;
             }
             case 'F9': {
-                const listDeleteBtn = document.querySelector('fi-list-view2 span:has(img[src="assets/icons/trash-24.png"])');
+                // 1. Find all tabs and select the one that is currently visible/rendered (height > 0)
+                const activeTab = Array.from(document.querySelectorAll('my-tab'))
+                .find(tab => tab.offsetHeight > 0);
+
+                // 2. Query the trash button inside that visible tab
+                const listDeleteBtn = activeTab?.querySelector('img[src*="assets/icons/trash-24.png"]');
+
                 if (listDeleteBtn) {
                     listDeleteBtn.click();
                 }
@@ -449,7 +459,7 @@
 
     document.addEventListener('mousedown', function (event) {
         const userSpan = document.querySelector('div.tw-justify-end label:nth-child(3) > span');
-        if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
+        //if (!userSpan || userSpan.textContent.trim() !== 'youcefham') return;
 
         if (event.button !== 3 && event.button !== 4) return;
 
